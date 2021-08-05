@@ -1,1 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+.navbar {
+  height: 70px;
+  padding: 5px;
+  position: sticky;
+  top: 0;
+  z-index: 20000;
+  width: 100%;
+  -webkit-box-shadow: 1px 16px 25px 5px rgba(0, 0, 0, 0.29);
+  box-shadow: 1px 16px 25px 5px rgba(0, 0, 0, 0.29);
+  background-color: darkslateblue;
+}
+
+.nav-content {
+  width: 100%;
+  display: flex;
+  justify-content: unset;
+  gap: 20px;
+}
+
+.title {
+  color: white;
+  padding: 10px;
+}
