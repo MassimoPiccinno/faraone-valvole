@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DoCheck, OnInit } from '@angular/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { Status } from '../models/status.enum';
 import { Valve } from '../models/valve.model';
@@ -22,6 +22,13 @@ export class MainComponent implements OnInit {
   getAllStatus() {
     this.ValvesService.getStatus().subscribe(
       (response: any) => {
+        if (response.warning == true) {
+          this.messageService.add({
+            severity: 'warning',
+            summary: 'Attenzione',
+            detail: 'Possibili problemi di comunicazione, riprovare tra poco',
+          });
+        }
         var valves: Valve[] = [];
         Object.keys(response.valveStatus).forEach(function (key) {
           let v = new Valve();
@@ -29,6 +36,8 @@ export class MainComponent implements OnInit {
           v.status = response.valveStatus[key];
           if (v.status == Status.OPEN) {
             v.isOpen = true;
+          } else {
+            v.isOpen = false;
           }
           valves.push(v);
         });
@@ -48,6 +57,9 @@ export class MainComponent implements OnInit {
 
   ngOnInit(): void {
     this.getAllStatus();
+    setInterval(() => {
+      this.getAllStatus();
+    }, 5 * 1000);
   }
 
   changeValveStatus(valve: Valve) {
@@ -58,7 +70,11 @@ export class MainComponent implements OnInit {
           accept: () => {
             this.ValvesService.closeValve(valve.name).subscribe(
               (response) => {
-                this.getAllStatus();
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Chiusa',
+                  detail: 'Valvola ' + valve.name + ' chiusa',
+                });
               },
               (error) => {
                 this.messageService.add({
@@ -83,7 +99,11 @@ export class MainComponent implements OnInit {
           accept: () => {
             this.ValvesService.openValve(valve.name).subscribe(
               (response) => {
-                this.getAllStatus();
+                this.messageService.add({
+                  severity: 'success',
+                  summary: 'Aperta',
+                  detail: 'Valvola ' + valve.name + ' aperta',
+                });
               },
               (error) => {
                 this.messageService.add({
@@ -102,5 +122,35 @@ export class MainComponent implements OnInit {
         break;
       }
     }
+  }
+
+  closeAll() {
+    console.log('chiudi tutto');
+
+    this.confirmationService.confirm({
+      message: 'Chiudere tutte le valvole ?',
+      accept: () => {
+        this.ValvesService.closeAll().subscribe(
+          (response) => {
+            this.messageService.add({
+              severity: 'success',
+              summary: 'Chiuse',
+              detail: 'Tutte le valvola chiuse',
+            });
+          },
+          (error) => {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Errore',
+              detail:
+                'Si è verificato un errore, prova a ricaricare la pagina o controlla la connessione',
+            });
+          }
+        );
+      },
+      reject: () => {
+        this.getAllStatus();
+      },
+    });
   }
 }

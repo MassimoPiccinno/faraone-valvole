@@ -19,4 +19,8 @@ export class ValvesService {
   closeValve(valve: number) {
     return this.http.get(`${environment.apiUrl}/valve/close/${valve}`);
   }
+
+  closeAll() {
+    return this.http.get(`${environment.apiUrl}/valve/close/all`);
+  }
 }
